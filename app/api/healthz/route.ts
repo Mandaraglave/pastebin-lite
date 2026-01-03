@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const redis = getRedis();
 
-    // verify persistence access (safe for Upstash)
+    // Verify real persistence access (Upstash-safe)
     await redis.set("healthz", "1", { ex: 5 });
 
     return NextResponse.json(
