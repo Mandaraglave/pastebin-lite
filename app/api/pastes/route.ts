@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRedis } from "@/lib/redis";
 import { nanoid } from "nanoid";
 import { getNowMs } from "@/lib/time";
-import { buildPublicUrl } from "@/lib/url";
 export const runtime = "nodejs";
 
 function isValidInt(v: any): v is number {
@@ -39,13 +38,24 @@ export async function POST(req: NextRequest) {
   const viewsKey = `paste:views:${id}`;
   const expKey = `paste:exp:${id}`;
 
-  const redis = getRedis();
-  const ops: Promise<any>[] = [redis.set(dataKey, content)];
-  if (maxViews !== undefined) ops.push(redis.set(viewsKey, String(maxViews)));
-  if (expiresAtMs !== null) ops.push(redis.set(expKey, String(expiresAtMs)));
-  await Promise.all(ops);
+    try {
+    const redis = getRedis();
+    const ops: Promise<any>[] = [redis.set(dataKey, content)];
 
-  const base = buildPublicUrl(req);
-  const url = `${base}/p/${id}`;
+    if (maxViews !== undefined)
+      ops.push(redis.set(viewsKey, String(maxViews)));
+
+    if (expiresAtMs !== null)
+      ops.push(redis.set(expKey, String(expiresAtMs)));
+
+    await Promise.all(ops);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "storage_error" }, { status: 500 });
+  }
+
+  const url = `/p/${id}`;
+
   return NextResponse.json({ id, url }, { status: 201 });
+
 }
