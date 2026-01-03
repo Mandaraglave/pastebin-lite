@@ -1,4 +1,7 @@
 # Pastebin-Lite
+This project demonstrates building a serverless, distributed system using
+Next.js App Router and Upstash Redis, focusing on API design, consistency,
+and production deployment.
 
 A minimal Pastebin-like app built with Next.js 14 and Upstash Redis. Users can create a text paste, get a shareable link, and optionally set constraints:
 - Time-based expiry (TTL)
@@ -57,10 +60,13 @@ If `TEST_MODE=1`, the app reads the request header `x-test-now-ms` (milliseconds
 - Deploy. The app should work without manual DB migrations.
 
 ## Design Decisions
-- Serverless-ready design using Upstash Redis REST API
-- Atomic view decrement and checks via a Redis Lua script to avoid race conditions under concurrency
-- HTML view uses server-rendered fetch to the API and safely escapes content
-- No hardcoded localhost URLs in code; base URL is derived from headers
+- Serverless-first architecture using Upstash Redis REST API
+- Atomic view decrement and availability checks using Redis Lua scripts
+  to prevent race conditions under concurrent access
+- Deterministic time abstraction to enable reliable expiry testing
+- Server-rendered HTML page fetches data from internal API and escapes
+  content to prevent XSS
+- No hardcoded base URLs; request headers are used to derive runtime origin
 
 ## Scripts
 - `npm run dev` – start dev server
@@ -69,3 +75,18 @@ If `TEST_MODE=1`, the app reads the request header `x-test-now-ms` (milliseconds
 
 ## Notes
 - Health check returns HTTP 200 with `{ ok: true|false }` and includes a `redis` field when the Redis ping succeeds.
+
+## Known Behavior (Edge + Redis)
+
+When a paste is created and accessed immediately, a temporary 404 may occur.
+This happens due to eventual consistency in global Edge runtimes with
+Upstash Redis REST.
+
+The paste becomes available within seconds once data propagates.
+This is expected behavior in distributed systems.
+
+## Future Improvements
+- UI indicator for paste availability immediately after creation
+- Client-side retry when a paste is accessed before global propagation
+- Optional authentication for private pastes
+- Rate limiting for paste creation
