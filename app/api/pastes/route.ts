@@ -41,8 +41,8 @@ export async function POST(req: NextRequest) {
 
   const redis = getRedis();
   const ops: Promise<any>[] = [redis.set(dataKey, content)];
-  if (maxViews !== undefined) ops.push(redis.set(viewsKey, maxViews));
-  if (expiresAtMs !== null) ops.push(redis.set(expKey, expiresAtMs));
+  if (maxViews !== undefined) ops.push(redis.set(viewsKey, String(maxViews)));
+  if (expiresAtMs !== null) ops.push(redis.set(expKey, String(expiresAtMs)));
   await Promise.all(ops);
 
   const base = buildPublicUrl(req);
