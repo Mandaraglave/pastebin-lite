@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { redis } from "@/lib/redis";
+import { getRedis } from "@/lib/redis";
 import { nanoid } from "nanoid";
 import { getNowMs } from "@/lib/time";
 import { buildPublicUrl } from "@/lib/url";
@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
   const viewsKey = `paste:views:${id}`;
   const expKey = `paste:exp:${id}`;
 
+  const redis = getRedis();
   const ops: Promise<any>[] = [redis.set(dataKey, content)];
   if (maxViews !== undefined) ops.push(redis.set(viewsKey, maxViews));
   if (expiresAtMs !== null) ops.push(redis.set(expKey, expiresAtMs));
