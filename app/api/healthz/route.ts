@@ -4,9 +4,18 @@ import { getRedis } from "@/lib/redis";
 export async function GET() {
   try {
     const redis = getRedis();
-    const pong = await redis.ping();
-    return NextResponse.json({ ok: true, redis: pong === "PONG" }, { status: 200 });
-  } catch (e) {
-    return NextResponse.json({ ok: false }, { status: 200 });
+
+    // verify persistence access (safe for Upstash)
+    await redis.set("healthz", "1", { ex: 5 });
+
+    return NextResponse.json(
+      { ok: true },
+      { status: 200 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { ok: false },
+      { status: 200 }
+    );
   }
 }
