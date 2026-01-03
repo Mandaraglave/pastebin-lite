@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { redis } from "@/lib/redis";
+import { getRedis } from "@/lib/redis";
 import { getNowMs } from "@/lib/time";
 
 async function getAndCountView(id: string, now: number) {
@@ -33,6 +33,7 @@ end
 return {"OK", data, tostring(remaining), exp or ""}
 `;
 
+  const redis = getRedis();
   const res = await redis.eval(script, [dataKey, viewsKey, expKey], [now.toString()]);
   return res as any;
 }
