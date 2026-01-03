@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRedis } from "@/lib/redis";
 import { getNowMs } from "@/lib/time";
+export const runtime = "nodejs";
 
 async function getAndCountView(id: string, now: number) {
   const dataKey = `paste:data:${id}`;

@@ -24,12 +24,20 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data?.error || "Failed to create paste");
-      } else {
-        setResult(data.url);
-      }
+      let data: any = null;
+
+try {
+  data = await res.json();
+} catch {
+  // response was not JSON
+}
+
+if (!res.ok) {
+  setError(data?.error || `Request failed (${res.status})`);
+} else {
+  setResult(data.url);
+}
+
     } catch {
       setError("Network error");
     } finally {

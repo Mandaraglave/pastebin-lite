@@ -3,6 +3,7 @@ import { getRedis } from "@/lib/redis";
 import { nanoid } from "nanoid";
 import { getNowMs } from "@/lib/time";
 import { buildPublicUrl } from "@/lib/url";
+export const runtime = "nodejs";
 
 function isValidInt(v: any): v is number {
   return typeof v === "number" && Number.isInteger(v) && v >= 1;
